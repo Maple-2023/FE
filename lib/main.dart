@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mamap/screens/home/home_page.dart';
-import 'package:flutter_mamap/screens/recommand/recommand.dart';
-import 'package:flutter_mamap/screens/recommand/recommand_result.dart';
-import 'package:flutter_mamap/screens/walking/walking.dart';
+import 'colors.dart';
+import 'login.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -18,12 +16,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: Colors.white
           //fontFamily: 글씨체 정하기
           ),
-      initialRoute: "/walking",
+      initialRoute: "/login",
       routes: {
-        "/home": (context) => const Home(),
-        "/recommand": (context) => const Recommand(),
-        "/recommand_result": (context) => const RecommandResult(),
-        "/waking": (context) => const Walking(),
+        "/login": (context) => const Login(),
       },
     );
   }
