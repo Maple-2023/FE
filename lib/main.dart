@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mamap/screens/home/home_page.dart';
+import 'package:flutter_mamap/screens/home/home.dart';
 import 'package:flutter_mamap/screens/recommand/recommand.dart';
 import 'package:flutter_mamap/screens/recommand/recommand_result.dart';
 import 'package:flutter_mamap/screens/walking/walking.dart';
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: Colors.white
           //fontFamily: 글씨체 정하기
           ),
-      initialRoute: "/walking",
+      initialRoute: "/recommand",
       routes: {
         "/home": (context) => const Home(),
         "/recommand": (context) => const Recommand(),
