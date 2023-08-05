@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'colors.dart';
 
 class Login extends StatelessWidget {
   const Login({Key? key}) : super(key: key);
@@ -9,7 +10,7 @@ class Login extends StatelessWidget {
         builder: (context, constraints) => Scaffold(
             appBar: AppBar(
               title: Text(
-                'Hello Flutter',
+                'Ma Map',
                 style: TextStyle(fontSize: 28),
               ),
               centerTitle: true,
@@ -18,19 +19,41 @@ class Login extends StatelessWidget {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  TextField(
-                    decoration: InputDecoration(labelText: 'email'),
-                  ),
-                  TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(labelText: 'password'),
+                  SizedBox(
+                    height: 500,
                   ),
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
                       onPressed: () {},
-                      child: Text('로그인'),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(kakao_color),
+                      ),
+                      child: Text('카카오톡 로그인'),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(top: 20.0),
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.white),
+                      ),
+                      child: Text('구글 로그인'),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(top: 20.0),
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(naver_color),
+                      ),
+                      child: Text('네이버 로그인'),
                     ),
                   )
                 ],

@@ -7,3 +7,6 @@ const Color mainOrange = Color(0xffF89F4D);
 const Color black = Color(0xff2D2D2D);
 const Color gray = Color(0xff7E7E7D);
 const Color whiteGray = Color(0xffECECE8);
+
+const Color kakao_color = Color(0xfffbe300);
+const Color naver_color = Color(0xff2DB400);
