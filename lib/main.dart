@@ -18,12 +18,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: Colors.white
           //fontFamily: 글씨체 정하기
           ),
-      initialRoute: "/recommand",
+      initialRoute: "/walking",
       routes: {
         "/home": (context) => const Home(),
         "/recommand": (context) => const Recommand(),
         "/recommand_result": (context) => const RecommandResult(),
-        "/waking": (context) => const Walking(),
+        "/walking": (context) => const Walking(),
       },
     );
   }
