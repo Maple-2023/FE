@@ -73,10 +73,11 @@ packages:
   flutter_heatmap_calendar:
     dependency: "direct main"
     description:
-      name: flutter_heatmap_calendar
-      sha256: "0933071844cd604b938e38358984244292ba1ba8f4b4b6f0f091f5927a23e958"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: c82952d3fc9035fbf89f79a318d81be3043ba2ee
+      url: "https://github.com/yundabin0608/mamap_calendar.git"
+    source: git
     version: "1.0.5"
   flutter_lints:
     dependency: "direct dev"

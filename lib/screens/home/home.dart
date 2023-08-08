@@ -82,7 +82,9 @@ class Home extends StatelessWidget {
                   SizedBox(
                     width: deviceWidth * 0.8,
                     child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(context, "/walking");
+                        },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
@@ -101,7 +103,7 @@ class Home extends StatelessWidget {
             Container(
               width: deviceWidth,
               height: deviceHeight * 0.55,
-              padding: const EdgeInsets.only(top: 30, left: 10, right: 10),
+              padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
               color: Colors.white,
               child: HeatMapCalendar(
                 datasets: record,
@@ -110,7 +112,7 @@ class Home extends StatelessWidget {
                 margin: const EdgeInsets.all(5),
                 showColorTip: false,
                 monthFontSize: 20,
-                weekFontSize: 12,
+                weekFontSize: 15,
                 weekTextColor: black,
                 textColor: gray,
                 colorMode: ColorMode.color,
