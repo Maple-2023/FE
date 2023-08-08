@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: Colors.white
           //fontFamily: 글씨체 정하기
           ),
-      initialRoute: "/walking",
+      initialRoute: "/home",
       routes: {
         "/home": (context) => const Home(),
         "/recommand": (context) => const Recommand(),

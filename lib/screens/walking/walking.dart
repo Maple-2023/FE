@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:flutter_mamap/colors.dart';
-import 'package:flutter_mamap/screens/walking/recording_box.dart';
+import 'package:flutter_mamap/widgets/recording_box.dart';
 
 class Walking extends StatelessWidget {
   const Walking({super.key});
@@ -54,7 +54,7 @@ class Walking extends StatelessWidget {
                           ),
                           const SizedBox(height: 10),
                           recordingBox(deviceWidth * 0.25, deviceHeight * 0.08,
-                              steps, distance, energy),
+                              steps, distance, energy, 27, 17),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -104,8 +104,14 @@ class Walking extends StatelessWidget {
                                 color: Colors.white,
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(20))),
-                            child: recordingBox(deviceWidth * 0.25,
-                                deviceHeight * 0.08, steps, distance, energy),
+                            child: recordingBox(
+                                deviceWidth * 0.25,
+                                deviceHeight * 0.08,
+                                steps,
+                                distance,
+                                energy,
+                                27,
+                                17),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
