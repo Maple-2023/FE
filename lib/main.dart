@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mamap/screens/bottom_bar.dart';
 import 'package:flutter_mamap/screens/home/home.dart';
 import 'package:flutter_mamap/screens/recommand/recommand.dart';
 import 'package:flutter_mamap/screens/recommand/recommand_result.dart';
@@ -18,12 +19,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: Colors.white
           //fontFamily: 글씨체 정하기
           ),
-      initialRoute: "/home",
+      initialRoute: "/bottom_bar",
       routes: {
         "/home": (context) => const Home(),
         "/recommand": (context) => const Recommand(),
         "/recommand_result": (context) => const RecommandResult(),
         "/walking": (context) => const Walking(),
+        "/bottom_bar": (context) => const bottomBar()
       },
     );
   }

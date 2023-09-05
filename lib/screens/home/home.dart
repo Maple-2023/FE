@@ -3,10 +3,16 @@ import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:flutter_mamap/colors.dart';
 import 'package:flutter_mamap/widgets/recording_box.dart';
 import 'package:flutter_mamap/widgets/weather_widget.dart';
+import 'package:geolocator/geolocator.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
@@ -26,6 +32,12 @@ class Home extends StatelessWidget {
       DateTime(2023, 8, 6): 2,
     };
 
+    void getposition() async {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.medium);
+      print(position);
+    }
+
     return LayoutBuilder(
       builder: (context, constrains) => Scaffold(
         backgroundColor: Colors.white,
@@ -33,7 +45,7 @@ class Home extends StatelessWidget {
           children: [
             Container(
               width: deviceWidth,
-              height: deviceHeight * 0.45,
+              height: deviceHeight * 0.41,
               color: mainGreen1,
               padding: const EdgeInsets.only(
                   top: 30, left: 20, right: 20, bottom: 20),
@@ -102,16 +114,17 @@ class Home extends StatelessWidget {
             ),
             Container(
               width: deviceWidth,
-              height: deviceHeight * 0.55,
-              padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
+              height: deviceHeight * 0.47,
+              padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
               color: Colors.white,
               child: HeatMapCalendar(
                 datasets: record,
-                size: 40,
+                size: 35,
                 borderRadius: 25,
-                margin: const EdgeInsets.all(5),
+                margin:
+                    const EdgeInsets.only(left: 8, right: 8, bottom: 5, top: 5),
                 showColorTip: false,
-                monthFontSize: 20,
+                monthFontSize: 18,
                 weekFontSize: 15,
                 weekTextColor: black,
                 textColor: gray,
@@ -121,7 +134,7 @@ class Home extends StatelessWidget {
                   2: mainOrange,
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
