@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mamap/screens/bottom_bar.dart';
 import 'package:flutter_mamap/screens/home/home.dart';
 import 'package:flutter_mamap/screens/recommand/recommand.dart';
 import 'package:flutter_mamap/screens/recommand/recommand_result.dart';
 import 'package:flutter_mamap/screens/walking/walking.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: "assets/config/.env");
   runApp(const MyApp());
 }
 

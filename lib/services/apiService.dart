@@ -40,13 +40,13 @@ class ApiService {
       final url = Uri.parse(
           'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&language=ko&key=$_geocodingApiKey');
       final response = await http.get(url);
-      logger.d(response.statusCode);
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
-        logger.d(data);
-
+        String tmpLocation = data["results"][0]["formatted_address"];
+        List<String> locations = tmpLocation.split(' ');
         return {
           "flag": true,
+          "location": "${locations[1]} ${locations[2]} ${locations[3]}",
         };
       } else {
         return {"flag": false};

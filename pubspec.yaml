@@ -30,16 +30,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_dotenv: ^5.1.0
+  http: ^0.13.5
+  logger: ^2.0.2
+  
+  geolocator: ^9.0.2
+  google_maps_flutter: ^0.5.4+2
+  location: ^5.0.0
+  stop_watch_timer: ^3.0.1
+  intl: ^0.18.1
+
+  sliding_clipped_nav_bar: ^3.1.0+4
   flutter_animation_progress_bar: ^2.3.1
   flutter_heatmap_calendar:
     git:
       url: https://github.com/yundabin0608/mamap_calendar.git
-  geolocator: ^9.0.2
-  sliding_clipped_nav_bar: ^3.1.0+4
-  kakao_map_plugin: ^0.2.0
-  flutter_dotenv: ^5.1.0
-  http: ^0.13.5
-  logger: ^2.0.2
 
 
   # The following adds the Cupertino Icons font to your application.
