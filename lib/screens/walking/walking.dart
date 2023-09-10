@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:flutter_mamap/colors.dart';
+import 'package:flutter_mamap/screens/walking/marker.dart';
+import 'package:flutter_mamap/utilities/informController.dart';
+import 'package:flutter_mamap/utilities/makingPolyline.dart';
 import 'package:flutter_mamap/widgets/recording_box.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/instance_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
@@ -22,47 +25,36 @@ class Walking extends StatefulWidget {
 
 class _WalkingState extends State<Walking> {
   late double distance, progressing;
-  late int steps, energy;
-
-  // 경로 그리기 위해 필요함
-  final Set<Polyline> polyline = {};
-  List<LatLng> route = [];
-
-  // 초기 값
-  double dist = 0;
+  late int steps, energy, time;
+  bool isFinished = false;
+  bool isStopped = false;
   late String displayTime;
-  late int time, lastestTime;
   final StopWatchTimer stopWatchTimer = StopWatchTimer();
-
-  // 초기 위치 및 거리
-  LatLng sourceLocation = const LatLng(38.432199, 27.177221);
-  Position? startPosition, currentPosition;
-  final Completer<GoogleMapController> controller =
-      Completer<GoogleMapController>();
-
-  late StreamSubscription<Position> positionStream;
-
   BitmapDescriptor startPositionIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor currentPositionIcon = BitmapDescriptor.defaultMarker;
 
+  // 지도관련 경로, 위치
+  final Set<Polyline> polyline = {};
+  List<LatLng> route = [];
+  Position? startPosition, currentPosition;
+  GoogleMapController? googleMapController;
+  late StreamSubscription<Position>? positionStream;
+
   @override
   void initState() {
-    steps = energy = 0;
+    steps = energy = time = 0;
     distance = progressing = 0;
-    getCurrentPosition();
-    setCustomMarkerIcon();
     route.clear();
     polyline.clear();
-    dist = 0;
-    time = lastestTime = 0;
 
-    stopWatchTimer.onResetTimer();
-    stopWatchTimer.clearPresetTime();
+    setCustomMarker();
+    getCurrentPosition();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getCurrentPosition();
     });
-    stopWatchTimer.onStartTimer();
+
+    resetTimer();
     super.initState();
   }
 
@@ -72,7 +64,52 @@ class _WalkingState extends State<Walking> {
     stopWatchTimer.dispose();
   }
 
-  void setCustomMarkerIcon() {
+  @override
+  Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
+    final deviceHeight = MediaQuery.of(context).size.height;
+
+    return LayoutBuilder(
+      builder: (context, constrains) => Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _buildGoogleMap(deviceWidth, deviceHeight),
+            _buildPannel(deviceWidth, deviceHeight),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGoogleMap(double deviceWidth, double deviceHeight) {
+    return SizedBox(
+      height: deviceHeight * 0.68,
+      width: deviceWidth,
+      child: currentPosition == null
+          ? const Center(child: Text("Loading"))
+          : GoogleMap(
+              polylines: polyline,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              markers: {
+                marker("strat", startPosition!, startPositionIcon),
+                marker("current", currentPosition!, currentPositionIcon),
+              },
+              initialCameraPosition: CameraPosition(
+                zoom: 15,
+                target: LatLng(
+                  currentPosition!.latitude,
+                  currentPosition!.longitude,
+                ),
+              ),
+              onMapCreated: _onMapCreated,
+            ),
+    );
+  }
+
+  void setCustomMarker() {
     BitmapDescriptor.fromAssetImage(
             ImageConfiguration.empty, "assets/images/startPin.png")
         .then(
@@ -89,54 +126,49 @@ class _WalkingState extends State<Walking> {
     );
   }
 
+  void resetTimer() {
+    stopWatchTimer.onResetTimer();
+    stopWatchTimer.clearPresetTime();
+    stopWatchTimer.onStartTimer();
+  }
+
   Future<void> getCurrentPosition() async {
-    startPosition = currentPosition = await getPosition();
-    logger.d("first position $currentPosition");
+    currentPosition = await getPosition();
+    startPosition ??= currentPosition;
     setState(() {});
 
     if (currentPosition != null) {
       LocationSettings locationSettings = const LocationSettings(
           accuracy: LocationAccuracy.medium, distanceFilter: 3);
+
+      // distance 산정이 이상한 것 같아...
       positionStream =
           Geolocator.getPositionStream(locationSettings: locationSettings)
               .listen(
         (Position? position) async {
-          logger.d(position == null
-              ? 'Unknown'
-              : '${position.latitude.toString()}, ${position.longitude.toString()}');
-
           currentPosition = position;
 
           if (route.isNotEmpty) {
-            dist = dist +
-                Geolocator.distanceBetween(
-                    route.last.latitude,
-                    route.last.longitude,
-                    position!.latitude,
-                    position.longitude);
-          }
-          lastestTime = time;
+            distance = double.parse((distance +
+                    (Geolocator.distanceBetween(
+                          route.last.latitude,
+                          route.last.longitude,
+                          position!.latitude,
+                          position.longitude,
+                        ) /
+                        1000))
+                .toStringAsFixed(2));
 
-          if (route.isNotEmpty) {
-            if (route.last != LatLng(position!.latitude, position.longitude)) {
+            if (route.last != LatLng(position.latitude, position.longitude)) {
               route.add(LatLng(position.latitude, position.longitude));
-
-              polyline.add(Polyline(
-                  polylineId: PolylineId(position.toString()),
-                  // 기본값이랑 똑같음visible: true,
-                  points: route,
-                  width: 6,
-                  startCap: Cap.roundCap,
-                  endCap: Cap.roundCap,
-                  color: mainGreen1));
+              polyline.add(makingPolyline(position, route));
             }
           } else {
             route.add(LatLng(position!.latitude, position.longitude));
           }
           setState(() {});
 
-          GoogleMapController googleMapController = await controller.future;
-          googleMapController.animateCamera(
+          googleMapController?.animateCamera(
             CameraUpdate.newCameraPosition(
               CameraPosition(
                 zoom: 15,
@@ -151,200 +183,181 @@ class _WalkingState extends State<Walking> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-    final deviceHeight = MediaQuery.of(context).size.height;
-    bool isFinished = false;
-    bool isStopped = false;
+  Widget _buildPannel(double deviceWidth, double deviceHeight) {
+    return Container(
+      color: const Color.fromARGB(69, 230, 229, 229),
+      height: deviceHeight * 0.32,
+      width: deviceWidth,
+      padding: const EdgeInsets.only(bottom: 30, top: 30),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          StreamBuilder<int>(
+            stream: stopWatchTimer.rawTime,
+            initialData: 0,
+            builder: (context, snap) {
+              int tmpTime = snap.data!;
+              displayTime =
+                  "${StopWatchTimer.getDisplayTimeHours(tmpTime)}:${StopWatchTimer.getDisplayTimeMinute(tmpTime)}:${StopWatchTimer.getDisplayTimeSecond(tmpTime)}";
 
-    return LayoutBuilder(
-      builder: (context, constrains) => Scaffold(
-        backgroundColor: Colors.white,
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: deviceHeight * 0.68,
-              width: deviceWidth,
-              child: currentPosition == null
-                  ? const Center(child: Text("Loading"))
-                  : GoogleMap(
-                      polylines: polyline,
-                      myLocationButtonEnabled: false,
-                      zoomControlsEnabled: false,
-                      markers: {
-                        Marker(
-                          markerId: MarkerId("startLoation"),
-                          position: LatLng(startPosition!.latitude,
-                              startPosition!.longitude),
-                          icon: startPositionIcon,
-                        ),
-                        Marker(
-                            markerId: MarkerId("currentPosition"),
-                            position: LatLng(currentPosition!.latitude,
-                                currentPosition!.longitude),
-                            icon: currentPositionIcon),
-                      },
-                      initialCameraPosition: CameraPosition(
-                          target: LatLng(currentPosition!.latitude,
-                              currentPosition!.longitude),
-                          zoom: 15),
-                      onMapCreated: (mapController) {
-                        mapController
-                            .animateCamera(CameraUpdate.newCameraPosition(
-                          CameraPosition(
-                            zoom: 15,
-                            target: LatLng(currentPosition!.latitude,
-                                currentPosition!.longitude),
-                          ),
-                        ));
-                        setState(() {});
-                      },
-                    ),
-            ),
-            Container(
-                color: const Color.fromARGB(69, 230, 229, 229),
-                height: deviceHeight * 0.32,
-                width: deviceWidth,
-                padding: const EdgeInsets.only(bottom: 30, top: 30),
-                child: isFinished == false
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Container(
-                            width: deviceWidth,
-                            height: deviceHeight * 0.05,
-                            padding: EdgeInsets.only(
-                                left: deviceWidth * 0.05,
-                                right: deviceWidth * 0.05,
-                                bottom: 5),
-                            child: FAProgressBar(
-                              currentValue: progressing,
-                              progressColor: mainGreen1,
-                              backgroundColor: Colors.white,
-                              size: 35,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(20)),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          StreamBuilder<int>(
-                            stream: stopWatchTimer.rawTime,
-                            initialData: 0,
-                            builder: (context, snap) {
-                              time = snap.data!;
-                              displayTime =
-                                  "${StopWatchTimer.getDisplayTimeHours(time)}:${StopWatchTimer.getDisplayTimeMinute(time)}:${StopWatchTimer.getDisplayTimeSecond(time)}";
-                              return Text(displayTime);
-                            },
-                          ),
-                          recordingBox(deviceWidth * 0.25, deviceHeight * 0.08,
-                              steps, distance, energy, 27, 17),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              isStopped == false
-                                  ? IconButton(
-                                      iconSize: 60,
-                                      color: mainGreen1,
-                                      onPressed: () {
-                                        isStopped = true;
-                                      },
-                                      icon: Icon(
-                                        isStopped == false
-                                            ? Icons.pause_circle
-                                            : Icons.play_circle,
-                                      ),
-                                    )
-                                  : IconButton(
-                                      iconSize: 60,
-                                      color: mainGreen1,
-                                      onPressed: () {
-                                        isStopped = false;
-                                      },
-                                      icon: const Icon(
-                                        Icons.play_circle,
-                                      ),
-                                    ),
-                              const SizedBox(width: 30),
-                              IconButton(
-                                iconSize: 60,
-                                color: mainGreen1,
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.stop_circle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Container(
-                            width: deviceWidth * 0.9,
-                            height: deviceHeight * 0.12,
-                            decoration: const BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20))),
-                            child: recordingBox(
-                                deviceWidth * 0.25,
-                                deviceHeight * 0.08,
-                                steps,
-                                distance,
-                                energy,
-                                27,
-                                17),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: deviceWidth * 0.35,
-                                height: 45,
-                                child: ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: mainOrange,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(20)),
-                                    ),
-                                  ),
-                                  child: const Text("경로 저장",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w500)),
-                                ),
-                              ),
-                              SizedBox(width: deviceWidth * 0.18),
-                              SizedBox(
-                                width: deviceWidth * 0.35,
-                                height: 45,
-                                child: ElevatedButton(
-                                    onPressed: () {},
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: mainGreen1,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(20)),
-                                      ),
-                                    ),
-                                    child: const Text("산책 종료",
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w500))),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-          ],
-        ),
+              time = ((time + tmpTime) / 1000).round();
+              energy = (time / 15).round(); // 평균적으로 1분에 4칼로리 -> 60/4 = 1칼로리
+
+              return Container(
+                width: deviceWidth * 0.9,
+                height: deviceHeight * 0.12,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(20),
+                  ),
+                ),
+                child: recordingBox(
+                  deviceWidth * 0.25,
+                  deviceHeight * 0.08,
+                  steps,
+                  distance,
+                  energy,
+                  27,
+                  17,
+                ),
+              );
+            },
+          ),
+          isFinished == false
+              ? _buildRunningButtons(deviceWidth, deviceHeight)
+              : _buildFinishedButtons(deviceWidth, deviceHeight),
+        ],
       ),
     );
+  }
+
+  Widget _buildRunningButtons(double deviceWidth, double deviceHeight) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          iconSize: 60,
+          color: mainGreen1,
+          icon: Icon(isStopped ? Icons.play_circle : Icons.pause_circle),
+          onPressed: _onPressStopRecording,
+        ),
+        const SizedBox(width: 30),
+        IconButton(
+          iconSize: 60,
+          color: mainGreen1,
+          onPressed: _onPressFinishRecording,
+          icon: const Icon(
+            Icons.stop_circle,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFinishedButtons(double deviceWidth, double deviceHeight) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: deviceWidth * 0.4,
+          height: 45,
+          child: _buildAfterFinishButton("경로 저장", mainGreen1),
+        ),
+        SizedBox(width: deviceWidth * 0.09),
+        SizedBox(
+          width: deviceWidth * 0.4,
+          height: 45,
+          child: _buildAfterFinishButton("산책 종료", mainOrange),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAfterFinishButton(String txt, Color color) {
+    return ElevatedButton(
+      onPressed: () {
+        if (txt == "경로 저장") {
+          _onPressAfterFinish(true);
+        } else {
+          _onPressAfterFinish(false);
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
+      ),
+      child: Text(
+        txt,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  void _onMapCreated(GoogleMapController mapController) {
+    setState(() {
+      mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            zoom: 15,
+            target: LatLng(
+              currentPosition!.latitude,
+              currentPosition!.longitude,
+            ),
+          ),
+        ),
+      );
+      googleMapController = mapController;
+    });
+  }
+
+  void _onPressStopRecording() {
+    if (!isStopped) {
+      // 정지버튼
+      stopWatchTimer.onStopTimer();
+      positionStream?.pause();
+    } else {
+      // 재생버튼
+      stopWatchTimer.onStartTimer();
+      positionStream?.resume();
+    }
+    setState(() {
+      isStopped = !isStopped;
+    });
+  }
+
+  void _onPressFinishRecording() {
+    stopWatchTimer.onStopTimer();
+    positionStream?.cancel();
+    positionStream = null;
+
+    setState(() {
+      isFinished = !isFinished;
+      isStopped = true;
+    });
+  }
+
+  void _onPressAfterFinish(bool record) {
+    Get.find<InformController>()
+        .setDaySteps(Get.find<InformController>().daySteps.value + steps);
+    Get.find<InformController>().setDayDistance(
+        Get.find<InformController>().dayDistance.value + distance);
+    Get.find<InformController>()
+        .setDayEnergy(Get.find<InformController>().dayEnergy.value + energy);
+    Get.find<InformController>()
+        .setDayTime(Get.find<InformController>().dayTime.value + time);
+
+    Get.find<InformController>().nowLatitude(currentPosition!.latitude);
+    Get.find<InformController>().nowLongiude(currentPosition!.longitude);
+
+    // 지도 할때 뭔가 똑바로 취소가 안된 ㄴ낌임..
+
+    if (record) {
+      // 경로들 DB에 저장하고 알림주기
+    }
+
+    Navigator.pop(context);
   }
 }
