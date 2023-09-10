@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         "/recommand": (context) => const Recommand(),
         "/recommand_result": (context) => const RecommandResult(),
         "/walking": (context) => const Walking(),
-        "/bottom_bar": (context) => const bottomBar()
+        "/bottom_bar": (context) => const BottomBar()
       },
     );
   }

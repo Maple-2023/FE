@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mamap/colors.dart';
-import 'package:flutter_mamap/screens/walking/marker.dart';
+import 'package:flutter_mamap/screens/walking/iconMarker.dart';
+import 'package:flutter_mamap/screens/walking/makingPolyline.dart';
 import 'package:flutter_mamap/utilities/informController.dart';
-import 'package:flutter_mamap/utilities/makingPolyline.dart';
 import 'package:flutter_mamap/widgets/recording_box.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/instance_manager.dart';
@@ -94,8 +94,8 @@ class _WalkingState extends State<Walking> {
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
               markers: {
-                marker("strat", startPosition!, startPositionIcon),
-                marker("current", currentPosition!, currentPositionIcon),
+                iconMarker("start", startPosition!, startPositionIcon),
+                iconMarker("current", currentPosition!, currentPositionIcon),
               },
               initialCameraPosition: CameraPosition(
                 zoom: 15,

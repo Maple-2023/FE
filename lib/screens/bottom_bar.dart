@@ -4,14 +4,14 @@ import 'package:flutter_mamap/screens/home/home.dart';
 import 'package:flutter_mamap/screens/recommand/recommand.dart';
 import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
 
-class bottomBar extends StatefulWidget {
-  const bottomBar({super.key});
+class BottomBar extends StatefulWidget {
+  const BottomBar({super.key});
 
   @override
-  State<bottomBar> createState() => _bottomBarState();
+  State<BottomBar> createState() => _BottomBarState();
 }
 
-class _bottomBarState extends State<bottomBar> {
+class _BottomBarState extends State<BottomBar> {
   late PageController _pageController;
   int selectedIndex = 1;
   @override

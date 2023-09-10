@@ -1,6 +1,7 @@
-import 'package:flutter_mamap/colors.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import '../../colors.dart';
 
 Polyline makingPolyline(Position position, List<LatLng> route) {
   return Polyline(

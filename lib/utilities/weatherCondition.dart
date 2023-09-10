@@ -1,4 +1,4 @@
-String WeatherCondition(int code) {
+String weatherCondition(int code) {
   String weatherTxt = "";
   switch (code ~/ 100) {
     case 2:

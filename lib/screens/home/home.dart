@@ -47,7 +47,7 @@ class _HomeState extends State<Home> {
 
       // 위도 경도 기반 날씨 설정
       final weather = await ApiService().getWeather(tmpLatitude, tmpLongitude);
-      weatherTxt = WeatherCondition(weather["conditionId"]);
+      weatherTxt = weatherCondition(weather["conditionId"]);
       temp = weather["temp"];
 
       // 위도 경도 기반 위치 설정
