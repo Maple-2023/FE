@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/instance_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 import '../../utilities/getPosition.dart';
@@ -47,12 +48,11 @@ class _WalkingState extends State<Walking> {
     route.clear();
     polyline.clear();
 
-    setCustomMarker();
     getCurrentPosition();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getCurrentPosition();
     });
+    setCustomMarker();
 
     resetTimer();
     super.initState();
@@ -141,7 +141,7 @@ class _WalkingState extends State<Walking> {
       LocationSettings locationSettings = const LocationSettings(
           accuracy: LocationAccuracy.medium, distanceFilter: 3);
 
-      // distance 산정이 이상한 것 같아...
+      // start를 빠르게 누르면 마크가 갑자기 옮겨지는 일이 발생함
       positionStream =
           Geolocator.getPositionStream(locationSettings: locationSettings)
               .listen(
@@ -158,7 +158,6 @@ class _WalkingState extends State<Walking> {
                         ) /
                         1000))
                 .toStringAsFixed(2));
-
             if (route.last != LatLng(position.latitude, position.longitude)) {
               route.add(LatLng(position.latitude, position.longitude));
               polyline.add(makingPolyline(position, route));
@@ -328,9 +327,9 @@ class _WalkingState extends State<Walking> {
     });
   }
 
-  void _onPressFinishRecording() {
+  void _onPressFinishRecording() async {
     stopWatchTimer.onStopTimer();
-    positionStream?.cancel();
+    await positionStream?.cancel();
     positionStream = null;
 
     setState(() {
@@ -339,7 +338,7 @@ class _WalkingState extends State<Walking> {
     });
   }
 
-  void _onPressAfterFinish(bool record) {
+  void _onPressAfterFinish(bool record) async {
     Get.find<InformController>()
         .setDaySteps(Get.find<InformController>().daySteps.value + steps);
     Get.find<InformController>().setDayDistance(
@@ -352,12 +351,16 @@ class _WalkingState extends State<Walking> {
     Get.find<InformController>().nowLatitude(currentPosition!.latitude);
     Get.find<InformController>().nowLongiude(currentPosition!.longitude);
 
-    // 지도 할때 뭔가 똑바로 취소가 안된 ㄴ낌임..
-
     if (record) {
       // 경로들 DB에 저장하고 알림주기
-    }
 
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        text: "기록이 정상적으로 저장되었습니다.",
+      );
+    }
+    if (!mounted) return;
     Navigator.pop(context);
   }
 }
