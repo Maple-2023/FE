@@ -5,6 +5,9 @@ import 'package:flutter_mamap/screens/home/home.dart';
 import 'package:flutter_mamap/screens/recommand/recommand.dart';
 import 'package:flutter_mamap/screens/recommand/recommand_result.dart';
 import 'package:flutter_mamap/screens/walking/walking.dart';
+import 'package:flutter_mamap/utilities/informController.dart';
+import 'package:get/instance_manager.dart';
+import 'package:get/route_manager.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/config/.env");
@@ -16,7 +19,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    Get.put(InformController());
+    return GetMaterialApp(
       title: 'Ma Map',
       theme: ThemeData(scaffoldBackgroundColor: Colors.white
           //fontFamily: 글씨체 정하기
