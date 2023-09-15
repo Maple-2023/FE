@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../colors.dart';
 
-Widget recommandButton(int num, BuildContext context) {
+Widget recommandButton(int num, BuildContext context, String location) {
   String minutes;
   double width = 150;
   switch (num) {
@@ -26,7 +26,8 @@ Widget recommandButton(int num, BuildContext context) {
 
   return TextButton(
     onPressed: () {
-      Navigator.pushNamed(context, "/recommand_result");
+      Navigator.pushNamed(context, "/recommand_result",
+          arguments: {"location": location});
     },
     style: ButtonStyle(
       overlayColor: MaterialStateColor.resolveWith(

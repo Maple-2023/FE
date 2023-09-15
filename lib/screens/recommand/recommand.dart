@@ -1,9 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mamap/colors.dart';
 import 'package:flutter_mamap/screens/recommand/recommand_button.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 
-class Recommand extends StatelessWidget {
+import '../../services/apiService.dart';
+import '../../utilities/getPosition.dart';
+import '../../utilities/informController.dart';
+
+class Recommand extends StatefulWidget {
   const Recommand({super.key});
+
+  @override
+  State<Recommand> createState() => _RecommandState();
+}
+
+class _RecommandState extends State<Recommand> {
+  String location = "???";
+
+  @override
+  void initState() {
+    Future<Position> currentPosition = getPosition();
+
+    currentPosition.then((position) async {
+      double tmpLatitude = position.latitude;
+      double tmpLongitude = position.longitude;
+      Get.find<InformController>().setNowLatitude(tmpLatitude);
+      Get.find<InformController>().setNowLongitude(tmpLongitude);
+
+      // 위도 경도 기반 위치 설정
+      final locationTxt =
+          await ApiService().getLocation(tmpLatitude, tmpLongitude);
+      location = locationTxt["location"];
+      setState(() {});
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,53 +56,82 @@ class Recommand extends StatelessWidget {
                 fontSize: 25, fontWeight: FontWeight.bold, color: black),
           ),
         ),
-        body: Column(
+        body: _buildRecommandPanel(deviceWidth, deviceHeight, context),
+      ),
+    );
+  }
+
+  Widget _buildRecommandPanel(
+      double deviceWidth, double deviceHeight, BuildContext context) {
+    return Column(
+      children: [
+        _buildLocationPanel(deviceWidth, deviceHeight),
+        Column(
           children: [
-            SizedBox(
-              width: deviceWidth,
-              height: deviceHeight * 0.05,
-              child: Container(
-                alignment: Alignment.bottomCenter,
-                padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                decoration: const BoxDecoration(
-                    color: mainGreen1,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(30))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Text("현위치와 가까워요"),
-                    Text("서울 구로구 오류2동"),
-                    // 아이콘 버튼 추가할 것
-                  ],
-                ),
-              ),
-            ),
-            Column(
+            const SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    recommandButton(1, context),
-                    const SizedBox(width: 15),
-                    recommandButton(2, context)
-                  ],
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    recommandButton(3, context),
-                    const SizedBox(width: 15),
-                    recommandButton(4, context)
-                  ],
-                ),
-                const SizedBox(height: 15),
-                recommandButton(5, context),
+                recommandButton(1, context, location),
+                const SizedBox(width: 15),
+                recommandButton(2, context, location)
               ],
-            )
+            ),
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                recommandButton(3, context, location),
+                const SizedBox(width: 15),
+                recommandButton(4, context, location)
+              ],
+            ),
+            const SizedBox(height: 15),
+            recommandButton(5, context, location),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _buildLocationPanel(double deviceWidth, double deviceHeight) {
+    return SizedBox(
+      width: deviceWidth,
+      height: deviceHeight * 0.05,
+      child: Container(
+        alignment: Alignment.bottomCenter,
+        padding: const EdgeInsets.only(bottom: 12, left: 20, right: 20),
+        decoration: const BoxDecoration(
+            color: mainGreen1,
+            borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30))),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("현위치와 가까워요",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(location,
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w400)),
+                const SizedBox(width: 2),
+                SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: IconButton(
+                      onPressed: () {},
+                      color: mainOrange,
+                      padding: const EdgeInsets.all(0),
+                      icon: const Icon(
+                        Icons.my_location,
+                      )),
+                ),
+              ],
+            ),
           ],
         ),
       ),

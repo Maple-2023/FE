@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mamap/colors.dart';
 import 'package:flutter_mamap/screens/home/home.dart';
 import 'package:flutter_mamap/screens/recommand/recommand.dart';
+import 'package:flutter_mamap/screens/record/record.dart';
 import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
 
 class BottomBar extends StatefulWidget {
@@ -68,7 +69,7 @@ class _BottomBarState extends State<BottomBar> {
 }
 
 List<Widget> _listOfWidget = <Widget>[
-  Container(),
+  const Record(),
   const Home(),
   const Recommand(),
 ];

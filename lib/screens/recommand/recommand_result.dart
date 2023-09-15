@@ -10,6 +10,9 @@ class RecommandResult extends StatelessWidget {
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
     final deviceHeight = MediaQuery.of(context).size.height;
+    final argument = (ModalRoute.of(context)!.settings.arguments ??
+        <String, dynamic>{}) as Map;
+    final location = argument["location"];
     return LayoutBuilder(
       builder: (context, constrains) => Scaffold(
         appBar: AppBar(
@@ -30,23 +33,22 @@ class RecommandResult extends StatelessWidget {
               width: deviceWidth,
               height: deviceHeight * 0.05,
               child: Container(
-                padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                padding: const EdgeInsets.only(bottom: 12, left: 20, right: 20),
                 decoration: const BoxDecoration(
                     color: mainGreen1,
                     borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(30),
                         bottomRight: Radius.circular(30))),
-                child: Column(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text("현위치와 가까워요"),
-                        Text("서울 구로구 오류2동"),
-                        // 아이콘 버튼 추가할 것
-                      ],
-                    ),
+                    const Text("현위치와 가까워요",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500)),
+                    Text("$location",
+                        style: const TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w400)),
+                    // 아이콘 버튼 추가할 것
                   ],
                 ),
               ),
