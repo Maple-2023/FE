@@ -47,6 +47,9 @@ dependencies:
   flutter_heatmap_calendar:
     git:
       url: https://github.com/yundabin0608/mamap_calendar.git
+  
+  sliding_switch: ^1.1.0
+  table_calendar: ^3.0.9
 
 
   # The following adds the Cupertino Icons font to your application.
