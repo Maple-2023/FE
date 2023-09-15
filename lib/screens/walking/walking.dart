@@ -9,6 +9,7 @@ import 'package:flutter_mamap/widgets/recording_box.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/instance_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:health/health.dart';
 import 'package:logger/logger.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
@@ -26,13 +27,16 @@ class Walking extends StatefulWidget {
 
 class _WalkingState extends State<Walking> {
   late double distance, progressing;
-  late int steps, energy, time;
+  late int firstStep, step, energy, time;
+  bool checkFirstStep = false;
   bool isFinished = false;
   bool isStopped = false;
   late String displayTime;
   final StopWatchTimer stopWatchTimer = StopWatchTimer();
   BitmapDescriptor startPositionIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor currentPositionIcon = BitmapDescriptor.defaultMarker;
+  late HealthFactory health;
+  late List<HealthDataType> types;
 
   // 지도관련 경로, 위치
   final Set<Polyline> polyline = {};
@@ -43,11 +47,12 @@ class _WalkingState extends State<Walking> {
 
   @override
   void initState() {
-    steps = energy = time = 0;
+    firstStep = step = energy = time = 0;
     distance = progressing = 0;
     route.clear();
     polyline.clear();
 
+    setStepCount();
     getCurrentPosition();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getCurrentPosition();
@@ -132,6 +137,34 @@ class _WalkingState extends State<Walking> {
     stopWatchTimer.onStartTimer();
   }
 
+  Future<void> setStepCount() async {
+    if (!checkFirstStep) {
+      health = HealthFactory();
+      types = [HealthDataType.STEPS];
+      bool granted = await health.requestAuthorization(types);
+
+      if (granted) {
+        firstStep = await getHealthStep();
+        checkFirstStep = !checkFirstStep;
+      } else {
+        // 건강 데이터 접근 켜달라고 알림
+      }
+    } else {
+      int nowStep = await getHealthStep();
+      step = nowStep - firstStep;
+    }
+  }
+
+  Future<int> getHealthStep() async {
+    DateTime startDate = DateTime.now().subtract(const Duration(days: 1));
+    DateTime endDate = DateTime.now();
+    await health.getHealthDataFromTypes(startDate, endDate, types);
+    var now = DateTime.now();
+    return await health.getTotalStepsInInterval(
+            DateTime(now.year, now.month, now.day), now) ??
+        0;
+  }
+
   Future<void> getCurrentPosition() async {
     currentPosition = await getPosition();
     startPosition ??= currentPosition;
@@ -147,6 +180,7 @@ class _WalkingState extends State<Walking> {
               .listen(
         (Position? position) async {
           currentPosition = position;
+          await setStepCount();
 
           if (route.isNotEmpty) {
             distance = double.parse((distance +
@@ -214,7 +248,7 @@ class _WalkingState extends State<Walking> {
                 child: recordingBox(
                   deviceWidth * 0.25,
                   deviceHeight * 0.08,
-                  steps,
+                  step,
                   distance,
                   energy,
                   27,
@@ -340,7 +374,7 @@ class _WalkingState extends State<Walking> {
 
   void _onPressAfterFinish(bool record) async {
     Get.find<InformController>()
-        .setDaySteps(Get.find<InformController>().daySteps.value + steps);
+        .setDaySteps(Get.find<InformController>().daySteps.value + step);
     Get.find<InformController>().setDayDistance(
         Get.find<InformController>().dayDistance.value + distance);
     Get.find<InformController>()
