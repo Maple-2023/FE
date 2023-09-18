@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'login/login_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mamap/screens/bottom_bar.dart';
 import 'package:flutter_mamap/screens/home/home.dart';
+import 'package:flutter_mamap/screens/login/login_page.dart';
 import 'package:flutter_mamap/screens/recommand/recommand.dart';
 import 'package:flutter_mamap/screens/recommand/recommand_result.dart';
 import 'package:flutter_mamap/screens/record/record.dart';
@@ -29,9 +29,9 @@ class MyApp extends StatelessWidget {
           //fontFamily: 글씨체 정하기
           ),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/bottom_bar",
+      initialRoute: "/login",
       routes: {
-        "/login": (context) => const LoginPage(),
+        "/login": (context) => Login(),
         "/home": (context) => const Home(),
         "/recommand": (context) => const Recommand(),
         "/recommand_result": (context) => const RecommandResult(),
