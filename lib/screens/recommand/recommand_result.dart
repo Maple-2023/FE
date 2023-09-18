@@ -82,7 +82,6 @@ class RecommandResult extends StatelessWidget {
           .add(recommandResultBox(deviceWidth, minute, distance, routes));
       recommandresults.add(const SizedBox(height: 40));
     }
-    logger.d(recommandresults);
 
     return recommandresults;
   }
