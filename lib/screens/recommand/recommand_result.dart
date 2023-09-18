@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mamap/models/recommandCourse.dart';
 import 'package:flutter_mamap/screens/recommand/recommand_result_box.dart';
 
 import '../../colors.dart';
@@ -13,6 +14,7 @@ class RecommandResult extends StatelessWidget {
     final argument = (ModalRoute.of(context)!.settings.arguments ??
         <String, dynamic>{}) as Map;
     final location = argument["location"];
+    final courses = argument["courses"];
     return LayoutBuilder(
       builder: (context, constrains) => Scaffold(
         appBar: AppBar(
@@ -53,15 +55,35 @@ class RecommandResult extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-            recommandResultBox(deviceWidth),
-            const SizedBox(height: 30),
-            recommandResultBox(deviceWidth),
-            const SizedBox(height: 30),
-            recommandResultBox(deviceWidth),
+            SizedBox(
+              height: deviceHeight * 0.79,
+              child: ListView(
+                padding: EdgeInsets.only(
+                    top: 40,
+                    left: deviceWidth * 0.05,
+                    right: deviceWidth * 0.05),
+                children: _buildRecommandResult(courses, deviceWidth),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> _buildRecommandResult(
+      List<RecommandCourse> courses, double deviceWidth) {
+    List<Widget> recommandresults = [];
+    for (RecommandCourse course in courses) {
+      int minute = course.minute;
+      double distance = course.distance;
+      List<List<num>> routes = course.routes;
+      recommandresults
+          .add(recommandResultBox(deviceWidth, minute, distance, routes));
+      recommandresults.add(const SizedBox(height: 40));
+    }
+    logger.d(recommandresults);
+
+    return recommandresults;
   }
 }

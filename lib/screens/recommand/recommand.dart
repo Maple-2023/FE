@@ -15,6 +15,8 @@ class Recommand extends StatefulWidget {
   State<Recommand> createState() => _RecommandState();
 }
 
+double? tmpLatitude, tmpLongitude;
+
 class _RecommandState extends State<Recommand> {
   String location = "???";
 
@@ -23,14 +25,14 @@ class _RecommandState extends State<Recommand> {
     Future<Position> currentPosition = getPosition();
 
     currentPosition.then((position) async {
-      double tmpLatitude = position.latitude;
-      double tmpLongitude = position.longitude;
-      Get.find<InformController>().setNowLatitude(tmpLatitude);
-      Get.find<InformController>().setNowLongitude(tmpLongitude);
+      tmpLatitude = position.latitude;
+      tmpLongitude = position.longitude;
+      Get.find<InformController>().setNowLatitude(tmpLatitude!);
+      Get.find<InformController>().setNowLongitude(tmpLongitude!);
 
       // 위도 경도 기반 위치 설정
       final locationTxt =
-          await ApiService().getLocation(tmpLatitude, tmpLongitude);
+          await ApiService().getLocation(tmpLatitude!, tmpLongitude!);
       location = locationTxt["location"];
       setState(() {});
     });
@@ -66,30 +68,37 @@ class _RecommandState extends State<Recommand> {
     return Column(
       children: [
         _buildLocationPanel(deviceWidth, deviceHeight),
-        Column(
-          children: [
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                recommandButton(1, context, location),
-                const SizedBox(width: 15),
-                recommandButton(2, context, location)
-              ],
-            ),
-            const SizedBox(height: 15),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                recommandButton(3, context, location),
-                const SizedBox(width: 15),
-                recommandButton(4, context, location)
-              ],
-            ),
-            const SizedBox(height: 15),
-            recommandButton(5, context, location),
-          ],
-        )
+        tmpLatitude == null
+            ? const Center(child: Text("Loading"))
+            : Column(
+                children: [
+                  const SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      recommandButton(
+                          1, context, location, tmpLatitude!, tmpLongitude!),
+                      const SizedBox(width: 15),
+                      recommandButton(
+                          2, context, location, tmpLatitude!, tmpLongitude!)
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      recommandButton(
+                          3, context, location, tmpLatitude!, tmpLongitude!),
+                      const SizedBox(width: 15),
+                      recommandButton(
+                          4, context, location, tmpLatitude!, tmpLongitude!)
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  recommandButton(
+                      5, context, location, tmpLatitude!, tmpLongitude!),
+                ],
+              )
       ],
     );
   }
