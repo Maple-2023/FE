@@ -57,6 +57,8 @@ class _HomeState extends State<Home> {
       setState(() {});
     });
 
+    // 사용자의 일일정보 업데이트
+    _getUserInform();
     super.initState();
   }
 
@@ -231,5 +233,20 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  Future<void> _getUserInform() async {
+    // DB에서 가져올 것임 (걸음수, 칼로리, km)
+    // HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
+
+    // var types = [HealthDataType.STEPS];
+    // await health.requestAuthorization(types);
+    // var now = DateTime.now();
+    // await health.getHealthDataFromTypes(
+    //     now.subtract(const Duration(days: 1)), now, types);
+
+    // int? steps = await health.getTotalStepsInInterval(
+    //     DateTime(now.year, now.month, now.day), now);
+    // Get.find<InformController>().setDaySteps(steps!);
   }
 }

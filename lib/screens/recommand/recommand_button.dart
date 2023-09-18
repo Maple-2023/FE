@@ -1,33 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mamap/services/apiService.dart';
 
 import '../../colors.dart';
 
-Widget recommandButton(int num, BuildContext context, String location) {
+Widget recommandButton(int num, BuildContext context, String location,
+    double latitude, double longitude) {
   String minutes;
+  int minute;
   double width = 150;
   switch (num) {
     case 1:
       minutes = "15분";
+      minute = 15;
       break;
     case 2:
       minutes = "30분";
+      minute = 30;
       break;
     case 3:
       minutes = "45분";
+      minute = 45;
       break;
     case 4:
       minutes = "60분";
+      minute = 60;
       break;
     default:
       minutes = "내가 저장한 코스";
+      minute = 0;
       width = 330;
       break;
   }
 
   return TextButton(
-    onPressed: () {
+    onPressed: () async {
+      var courses =
+          await ApiService().getRecommandCourses(latitude, longitude, minute);
       Navigator.pushNamed(context, "/recommand_result",
-          arguments: {"location": location});
+          arguments: {"location": location, "courses": courses});
     },
     style: ButtonStyle(
       overlayColor: MaterialStateColor.resolveWith(
