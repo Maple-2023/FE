@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mamap/screens/login/login_button.dart';
+import 'package:flutter_mamap/screens/login/login_platform.dart';
+import 'package:flutter_mamap/services/auth_service.dart';
+import 'package:logger/logger.dart';
+
+var logger = Logger();
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -69,11 +74,16 @@ class Login extends StatelessWidget {
 
   Future<dynamic> Function() onPressButton(BuildContext context) {
     return () async {
-      Navigator.pushNamed(
-        context,
-        "/bottom_bar",
-      );
-      //await AuthService().signInWithGoogle();
+      LoginPlatform loginPlatform = await AuthService().signInWithGoogle();
+      if (loginPlatform != LoginPlatform.none) {
+        // DB 정보 불러서 컨트롤러 셋팅
+        Navigator.pushNamed(
+          context,
+          "/bottom_bar",
+        );
+      } else {
+        logger.d("오류");
+      }
     };
   }
 }
