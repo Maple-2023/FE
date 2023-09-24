@@ -1,31 +1,55 @@
 import 'package:flutter/material.dart';
 
-class LoginButton extends StatelessWidget {
-  final Function()? onTap;
+import '../../colors.dart';
 
-  const LoginButton({super.key, required this.onTap});
+class loginButton extends StatelessWidget {
+  final String buttonImgPath;
+  final String buttonText;
+  final Color buttonColor;
+  final double width;
+  final Function()? onPressButton;
+
+  const loginButton({
+    super.key,
+    required this.buttonImgPath,
+    required this.buttonText,
+    required this.buttonColor,
+    required this.width,
+    required this.onPressButton,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-          padding: const EdgeInsets.all(25),
-          margin: const EdgeInsets.symmetric(horizontal: 25.0),
-          decoration: BoxDecoration(
-            color: Color.fromARGB(255, 150, 232, 148),
-            borderRadius: BorderRadius.circular(8),
+    return ElevatedButton(
+      onPressed: onPressButton,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: buttonColor,
+        fixedSize: Size(width, 60),
+        elevation: 2,
+        shadowColor: whiteGray,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          buttonText == "Naver"
+              ? Image.asset(
+                  buttonImgPath,
+                  width: 30,
+                  height: 30,
+                  fit: BoxFit.fill,
+                )
+              : Image.asset(
+                  buttonImgPath,
+                  width: 35,
+                  height: 35,
+                  fit: BoxFit.fill,
+                ),
+          Text(
+            "$buttonText로 시작하기",
+            style: TextStyle(fontSize: 20, color: black),
           ),
-          child: Center(
-            child: Text(
-              "로그인",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          )),
+        ],
+      ),
     );
   }
 }
